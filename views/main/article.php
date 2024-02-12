@@ -1,0 +1,1 @@
+<?= $t->e('This is the article page') ?> <?= $article_id ?>
