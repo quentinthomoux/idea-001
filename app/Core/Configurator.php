@@ -4,6 +4,8 @@ namespace Yeepliva\Core;
 
 /**
  * Yeepliva configurator.
+ * 
+ * Load all config for the application.
  */
 class Configurator
 {
@@ -13,27 +15,27 @@ class Configurator
   public string $domain;
 
   /**
-   * @var string $lang_default The default language of the application.
+   * @var string $ll_default The default language and location.
    */
-  public string $lang_default;
+  public string $ll_default;
 
   /**
-   * @var array $lang_supported All supported language of the application.
+   * @var array $ll_supported All language and location.
    */
-  public array $lang_supported;
+  public array $ll_supported;
 
   /**
-   * @var string $view_title The view title.
+   * @var string $view_title The default title of the view.
    */
   public string $view_title;
 
   /**
-   * @var string $view_author The author.
+   * @var string $view_author The default author of the application & view.
    */
   public string $view_author;
 
   /**
-   * @var string $view_description The description.
+   * @var string $view_description The default description of the view.
    */
   public string $view_description;
 
@@ -42,13 +44,14 @@ class Configurator
    * 
    * @return void
    */
-  public function __construct() {
+  public function __construct()
+  {
     // Set data
     $this->updateParams();
   }
 
   /**
-   * Load or update the params of the application.
+   * Update config settings.
    * 
    * @return void
    */
@@ -57,7 +60,7 @@ class Configurator
     // Get the config file
     $params = require_once dirname(__DIR__, 2) . '/config.php';
 
-    // Set each params only if they exist
+    // Set each params
     foreach ($params as $param_key => $param_value) {
       if (property_exists(__CLASS__, $param_key)) {
         $this->$param_key = $param_value;

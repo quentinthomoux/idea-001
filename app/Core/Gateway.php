@@ -2,8 +2,8 @@
 
 namespace Yeepliva\Core;
 
+use Yeepliva\Language\LLManager;
 use Yeepliva\Language\Translator;
-use Yeepliva\Router\Route;
 use Yeepliva\Router\Router;
 
 /**
@@ -22,6 +22,11 @@ class Gateway
   private CookieManager $cookie_manager;
 
   /**
+   * @var LLManager $ll_manager Yeepliva language and location manager.
+   */
+  private LLManager $ll_manager;
+
+  /**
    * @var Router $router Yeepliva router.
    */
   private Router $router;
@@ -34,7 +39,7 @@ class Gateway
   /**
    * Push object(s) to gateway.
    * 
-   * @param array $objects The object(s) to be push.
+   * @param array $objects The object(s) to be pushed.
    * @return void
    */
   public function push(array $objects): void
@@ -49,8 +54,8 @@ class Gateway
   /**
    * Pull object(s) from gateway.
    * 
-   * @param string|array $objects The object(s) to be pull.
-   * @return string|array Object(s)
+   * @param string|array $objects The object(s) to be pulled.
+   * @return string|array Object(s).
    */
   public function pull(string|array $objects): string|array
   {
@@ -62,6 +67,7 @@ class Gateway
       $not_array = false;
     }
 
+    // Get the data of each objects
     foreach ($objects as $object_name) {
       if (property_exists(__CLASS__, $object_name)) {
         $objects_to_return[] = $this->$object_name;
@@ -70,7 +76,7 @@ class Gateway
       }
     }
 
-    // Extract of array if it was not one at the beginning
+    // Extract from array
     if ($not_array) {
       $objects_to_return = $objects_to_return[0];
     }

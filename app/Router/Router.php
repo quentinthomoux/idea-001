@@ -15,9 +15,9 @@ class Router
   private array $routes;
 
   /**
-   * @var string $route_matched_name The name of the route match.
+   * @var string $route_found_name The name of the route found.
    */
-  private string $route_matched_name;
+  private string $route_found_name;
 
   /**
    * @var string $param_pattern The Regex pattern for param.
@@ -36,7 +36,7 @@ class Router
   ];
 
   /**
-   * @var array $primary The primary param supported.
+   * @var array $primary The primary param of the application.
    */
   public array $primary = [
     'language' => null,
@@ -57,30 +57,6 @@ class Router
   }
 
   /**
-   * Register the route to the router.
-   * 
-   * @param string $name The name of the route.
-   * @param string $method The method of the route: "GET", "POST", ... Use "ALL" to match all request method.
-   * @param string $path The path of the route: "/", "subdomain@/", "/article-{i:article_id}", ...
-   * @param string $action The action of the route: "Controller@method".
-   * @param false|string $primary The primary param of the route: "Language", "Location"
-   * @return void
-   */
-  public function registerRoute(string $name, string $method, string $path, string $action, false|string $primary = false): void
-  {
-    // Set the primary param if route uses it
-    if ($primary && array_key_exists($primary, $this->primary)) {
-      $primary = [
-        'method' => $primary,
-        'value' => null,
-      ];
-    }
-
-    // Register the route
-    $this->routes[$name] = new Route($name, $method, $path, $action, $primary);
-  }
-
-  /**
    * Update the Regex param types.
    * 
    * @param array $param_types Regex param types.
@@ -95,11 +71,39 @@ class Router
   }
 
   /**
+   * Register route.
+   * 
+   * @param string $name The name of the route.
+   * @param string $method The method of the route: "GET", "POST", ... Use "ALL" to match all request method.
+   * @param string $path The path of the route: "/", "subdomain@/", "/article-{i:article_id}", ...
+   * @param string $action The action of the route: "Controller@method".
+   * @param false|string $primary The primary param of the route: "language", "location"
+   * @return void
+   */
+  public function registerRoute(string $name, string $method, string $path, string $action, false|string $primary = false): void
+  {
+    // Set the primary param if route uses it
+    if ($primary) {
+      if (array_key_exists($primary, $this->primary)) {
+        $primary = [
+          'method' => $primary,
+          'value' => null,
+        ];
+      } else {
+        $primary = false;
+      }
+    }
+
+    // Register route
+    $this->routes[$name] = new Route($name, $method, $path, $action, $primary);
+  }
+
+  /**
    * Try to find a route from the request.
    * 
-   * @return Route
+   * @return Route The route found.
    */
-  public function match(): Route
+  public function findRoute(): Route
   {
     // Set request
     $request_method = isset($_SERVER['REQUEST_METHOD']) ? htmlspecialchars($_SERVER['REQUEST_METHOD']) : 'GET';
@@ -166,7 +170,7 @@ class Router
           $route->params = $request_params;
 
           // Set matched route name
-          $this->route_matched_name = $route->name;
+          $this->route_found_name = $route->name;
 
           // var_dump('ROUTE  : ' . $route_method . ' => ' . $route_path);
 
@@ -248,20 +252,11 @@ class Router
   }
 
   /**
-   * Create a link of the domain.
-   * 
-   * @return string Link of the domain.
-   */
-  public function generateDomainLink(): string
-  {
-    return 'https://' . $this->domain;
-  }
-
-  /**
    * Create a link to a page of the application.
    * 
    * @param string $name The name of the route.
    * @param array $params The params of the route.
+   * @param false|array $alternate The value for alternate link.
    * @return string The link of a page.
    */
   public function generateLink(string $name, array $params = [], false|array $alternate = false): string
@@ -282,7 +277,7 @@ class Router
         }
       }
 
-      // Generate the route path
+      // Path
       $path = $this->compileRoutePath($path, $primary);
 
       // If it's match all route, remove the "*"
@@ -295,7 +290,7 @@ class Router
         $path = $this->compileRouteLink($path, $params);
       }
 
-      // Check if no errors
+      // Check if no error
       if ($path) {
         // Remove last "/"
         $path = trim($path, '/');
@@ -312,7 +307,7 @@ class Router
    * 
    * @param string $path The path of the route.
    * @param array $params_data The params of the route.
-   * @return false|string The The link of the route with params value.
+   * @return false|string The link of the route with params value.
    */
   private function compileRouteLink(string $path, array $params_data): false|string
   {
@@ -344,18 +339,29 @@ class Router
   }
 
   /**
-   * Create a link of the current page for alternate language.
+   * Create a link of the current page for alternate language or location.
    * 
-   * @param null|string $alternate The alternate value.
-   * @return string The link of a page.
+   * @param null|string $alternate
+   * @return string The alternate link.
    */
-  public function generateAltermateLink(?string $alternate = null)
+  public function generateLinkAlternate(?string $alternate = null): string
   {
     // Set data
-    $route = $this->routes[$this->route_matched_name];
+    $route = $this->routes[$this->route_found_name];
+    $name = $route->name;
     $params = $route->params;
     $alternate = [$alternate];
 
-    return $this->generateLink($this->route_matched_name, $params, $alternate);
+    return $this->generateLink($name, $params, $alternate);
+  }
+
+  /**
+   * Create a link of the domain.
+   * 
+   * @return string The link of the domain.
+   */
+  public function generateLinkDomain(): string
+  {
+    return 'https://' . $this->domain;
   }
 }

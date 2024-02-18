@@ -22,7 +22,7 @@ class Route
    * @param string $method The method of the route: "GET", "POST", ... Use "ALL" to match all request method.
    * @param string $path The path of the route: "/", "subdomain@/", "/article-{i:article_id}", ...
    * @param string $action The action of the route: "Controller@method".
-   * @param false|array $primary The primary param of the route: "Language", "Location"
+   * @param false|array $primary The primary param of the route.
    * @return void
    */
   public function __construct(public string $name, public string $method, public string $path, private string $action, public false|array $primary)
@@ -33,9 +33,9 @@ class Route
    * Execute the route.
    * 
    * @param Gateway $gateway Yeepliva gateway.
-   * @return View|false The route display.
+   * @return false|View The route display.
    */
-  public function execute(Gateway $gateway): View|false
+  public function execute(Gateway $gateway): false|View
   {
     // Separate the controller and the method
     $a = explode('@', $this->action);
@@ -48,6 +48,7 @@ class Route
     if (class_exists($controller) && method_exists($controller, $method)) {
       // Call the method in the controller with request params
       $controller = new $controller($gateway);
+
       return $controller->$method($this->params);
     } else {
       return false;

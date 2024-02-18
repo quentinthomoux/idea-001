@@ -3,7 +3,7 @@
 namespace Yeepliva\Controllers;
 
 /**
- * Yeepliva controller => main.
+ * Yeepliva controller => Main.
  */
 class MainController extends Controller
 {

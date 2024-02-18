@@ -2,13 +2,15 @@
 
 namespace Yeepliva\Core;
 
+use PHPUnit\Framework\Constraint\IsTrue;
+
 /**
  * Yeepliva cookie manager.
  */
 class CookieManager
 {
   /**
-   * @var array $cookie_authorization The authorization level of cookie usage.
+   * @var array $cookie_authorization Authorization level of cookie usage.
    */
   private array $cookie_authorization = [
     'required' => false,
@@ -36,9 +38,8 @@ class CookieManager
    */
   private function getCookieAuthorization(): void
   {
-    // Set data
     if ($cookie_authorization = $this->getCookie('cookie_authorization')) {
-      // Apply authorization according to level
+      // Set data
       switch ($cookie_authorization) {
         case 'required':
           $this->cookie_authorization['required'] = true;
@@ -62,7 +63,7 @@ class CookieManager
   /**
    * Create or update a cookie.
    * 
-   * @param string $name The name of the cookie.
+   * @param string $name The aname of the cookie.
    * @param true|string $group The group of authorization: "required", "optional", "analytic".
    * @param string|array|int|float $value The value of the cookie.
    * @param array $options The options of the cookie.
@@ -82,7 +83,6 @@ class CookieManager
         $options['httponly'] = isset($options['httponly']) && is_bool($options['httponly'])                                  ? $options['httponly']                     : true;
         $options['samesite'] = isset($options['samesite']) && is_string($options['samesite']) && $options['samesite'] !== '' ? $options['samesite']                     : 'strict';
 
-        // Send the cookie
         setcookie($name, $value, $options);
       } else {
         foreach ($value as $data_key => $data_value) {
@@ -99,9 +99,9 @@ class CookieManager
   /**
    * Get the value of a cookie.
    * 
-   * @param string $name The name of the cookie.
+   * @param string $name The aname of the cookie.
    * @param bool $delete_if_empty If true, the cookie will be deleted if the value is empty.
-   * @return null|string|int|float|array The value of the cookie.
+   * @return null|string|array|int|float The value of the cookie.
    */
   public function getCookie(string $name, bool $delete_if_empty = true): null|string|array|int|float
   {
@@ -114,21 +114,21 @@ class CookieManager
       $value = null;
     }
 
-    // If a value is found, clean and set the value
+    // Change the type of value if a value is found
     if ($value) {
-      $value = $this->setValueFromCookie($value);
+      $value = $this->transformValue($value);
     }
 
     return $value;
   }
 
   /**
-   * Clean the value and change the type if it's a number.
+   * Change the type of value if it's a a number.
    * 
-   * $param string|array $value The value to be cleaned.
-   * @return string|array|int|float The cleaned value.
+   * @param string|array $value The initial value.
+   * @return string|array|int|float The new value.
    */
-  private function setValueFromCookie(string|array $value): string|array|int|float
+  private function transformValue(string|array $value): string|array|int|float
   {
     // Convert to an array
     if (!is_array($value)) {
@@ -143,7 +143,7 @@ class CookieManager
         // Clean value
         $data_value = htmlspecialchars($data_value);
 
-        // Detect if it's a number
+        // Transform to number type
         if (is_numeric($data_value)) {
           if (str_contains($data_value, '.')) {
             $data_value = floatval($data_value);
@@ -155,11 +155,11 @@ class CookieManager
         // Set data
         $value_clean[$data_key] = $data_value;
       } else {
-        $value_clean[$data_key] = $this->setValueFromCookie($data_value);
+        $value_clean[$data_key] = $this->transformValue($data_value);
       }
     }
 
-    // Extract of array if it was not one at the beginning
+    // Extract from array
     if ($not_array) {
       $value_clean = $value_clean[0];
     }
@@ -170,7 +170,7 @@ class CookieManager
   /**
    * Delete a cookie.
    * 
-   * @param string $name The name of the cookie.
+   * @param string $name The aname of the cookie.
    * @return void
    */
   public function deleteCookie(string $name): void
@@ -183,7 +183,12 @@ class CookieManager
     $options['httponly'] = false;
     $options['samesite'] = 'strict';
 
-    // Delete cookie
-    setcookie($name, '', $options);
+    if (isset($_COOKIE[$name]) && is_array($_COOKIE[$name])) {
+      foreach ($_COOKIE[$name] as $data_key => $data_value) {
+        $this->deleteCookie($name . '[' . $data_key . ']');
+      }
+    } else {
+      setcookie($name, '', $options);
+    }
   }
 }

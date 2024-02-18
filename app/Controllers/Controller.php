@@ -9,7 +9,6 @@ use Yeepliva\Core\Gateway;
  */
 class Controller
 {
-
   /**
    * @var string $title The view title.
    */
@@ -28,7 +27,6 @@ class Controller
   /**
    * Initialization.
    * 
-   * @param Gateway $gateway Yeepliva gateway.
    * @return void
    */
   public function __construct(protected Gateway $gateway)
@@ -40,15 +38,15 @@ class Controller
    * 
    * @param string $path The path of the view.
    * @param null|array $params The params of the view.
-   * @return View The gene
+   * @return View The view generated.
    */
-  protected function generateView(string $path, ?array $params = null): View
+  public function generateView(string $path, ?array $params = null): View
   {
     // Set view path
     $views_path = dirname(__DIR__, 2) . '/views/';
 
     // Pull from gateway
-    [$configurator, $router, $t] = $this->gateway->pull(['configurator', 'router', 'translator']);
+    [$configurator, $router, $ll_manager, $t] = $this->gateway->pull(['configurator', 'router', 'll_manager', 'translator']);
 
     // Set settings view
     $title       = $this->title       !== '' ? $t->e($this->title) . ' - ' . $configurator->view_title : $configurator->view_title;

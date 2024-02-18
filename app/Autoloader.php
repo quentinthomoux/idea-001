@@ -10,7 +10,7 @@ namespace Yeepliva;
 class Autoloader
 {
   /**
-   * @var array $vendors All vendor namespaces ans their paths.
+   * @var array $vendors All vendor namespaces and their paths.
    */
   private static array $vendors = [
     'Yeepliva' => 'app',
@@ -42,7 +42,7 @@ class Autoloader
       $class_path = dirname(__DIR__) . '/' . preg_replace('`^' . $vendor . '`', self::$vendors[$vendor], $class) . '.php';
       $class_path = str_replace('\\', '/', $class_path);
 
-      // Import the class if the file exists
+      // Import file if file exists
       if (file_exists($class_path)) {
         require_once $class_path;
       }

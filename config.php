@@ -2,23 +2,23 @@
 
 return [
   /**
-   * domain
+   * Domain
    */
   'domain' => 'idea-001.test',
 
   /**
-   * Language
+   * Language & Location
    */
-  'lang_default' => 'en',
-  'lang_supported' => [
-    'en', 
-    'fr', 
+  'll_default' => 'en_US',
+  'll_supported' => [
+    'en_US',
+    'fr_FR',
   ],
 
   /**
-   * View settings
+   * View
    */
-  'view_title' => 'Idea 001',
-  'view_author' => 'Quentin',
-  'view_description' => 'This is the idea 001 description',
+  'view_title' => 'MyApp 008',
+  'view_author' => 'Quentin Thomoux',
+  'view_description' => 'This is the version 008 of the application: we can do it!',
 ];
